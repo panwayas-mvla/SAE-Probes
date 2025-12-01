@@ -7,9 +7,10 @@ from utils_data import get_xy_OOD, get_xyvals, get_xy_glue
 import torch
 import numpy as np
 import pandas as pd
+from pathlib import Path
 
-BASEPATH = '../SAE-Probing'
-# we use this to point towards a directory where we host model activations
+# Base path for data/artifacts. Resolve relative to this file so scripts can run from any CWD.
+BASEPATH = Path(__file__).resolve().parent
 
 def get_gemma_2_9b_sae_ids(layer):
     all_gemma_scope_saes = get_pretrained_saes_directory()["gemma-scope-9b-pt-res"].saes_map

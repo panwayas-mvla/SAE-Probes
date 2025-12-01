@@ -5,6 +5,7 @@ from tqdm import tqdm
 import torch
 from sklearn.preprocessing import LabelEncoder
 import os, glob
+from pathlib import Path
 try:
     from IPython import get_ipython  # type: ignore
 
@@ -17,8 +18,8 @@ try:
 except:
     is_notebook = False
 
-BASEPATH = '../SAE-Probing'
-# we use this to point towards a directory where we host model activations
+# Base path for data/artifacts. Resolve relative to this file so scripts can run from any CWD.
+BASEPATH = Path(__file__).resolve().parent
 
 # DATA UTILS
 def get_binary_df():
@@ -223,7 +224,7 @@ def get_glue_traintest(toget = 'ensemble', model_name = 'gemma-2-9b', layer = 20
     X_test, y_test = get_xy_glue(toget)
     return X_train, y_train, X_test, y_test
 
-def get_datasets(model_name = 'llama-3.1-8b'):
+def get_datasets(model_name = 'gemma-2-9b'):
     # Get all files in the directory
     dataset_sizes = get_dataset_sizes()
     files = os.listdir(f'{BASEPATH}/data/model_activations_{model_name}')
