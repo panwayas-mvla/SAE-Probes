@@ -364,6 +364,11 @@ def plot_logreg_layer_curve(
     grouped = (
         combined_df.groupby("layer")["test_auc"].agg(["mean", "std"]).reset_index()
     )
+    # Drop non-numeric layers (e.g., 'embed') to avoid plotting errors
+    grouped = grouped[pd.to_numeric(grouped["layer"], errors="coerce").notna()]
+    grouped["layer"] = grouped["layer"].astype(float)
+    grouped = grouped.sort_values("layer")
+
     plt.figure(figsize=(6.75, 3))
     plt.errorbar(
         grouped["layer"],
@@ -457,6 +462,11 @@ def main():
         action="store_true",
         help="If set, do not generate plots.",
     )
+    parser.add_argument(
+        "--force_rerun",
+        action="store_true",
+        help="Ignore any saved results and recompute everything.",
+    )
     args = parser.parse_args()
 
     if args.mode != "normal":
@@ -464,7 +474,21 @@ def main():
             "This script currently only replicates the 'normal' regime."
         )
 
-    combined = run_logreg_all_normal(model_name=args.model_name)
+    summary_path = os.path.join(
+        "results",
+        f"logreg_only_{args.model_name}",
+        "normal_settings",
+        "all_layers_logreg_results.csv",
+    )
+
+    if not args.force_rerun and os.path.exists(summary_path):
+        combined = pd.read_csv(summary_path)
+        print(
+            f"Loaded existing results from {summary_path}. "
+            "Use --force_rerun to recompute."
+        )
+    else:
+        combined = run_logreg_all_normal(model_name=args.model_name)
 
     summary = {
         "n_rows": int(len(combined)),
